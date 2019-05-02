@@ -1,0 +1,6 @@
+*.DS_Store
+*.ipynb_checkpoints
+*.out
+results
+trained_model
+
