@@ -1,3 +1,4 @@
+import torch
 from whaleData import *
 from model import *
 import matplotlib.pyplot as plt
