@@ -79,9 +79,10 @@ class WhaleDatasetTrain(Dataset):
             x0, y0, x1, y1 = self.img_bbox_dict[name]
             im_bbox = im[int(y0):int(y1), int(x0):int(x1)
                          ]  # locate the whale tails
-            return im_bbox, label
+            im_processed = cv2.resize(im_bbox, (224, 224))
         except KeyError:
-            return im, label
+            im_processed = cv2.resize(im, (224, 224))
+        return im_processed, label
         # transformed_im = self.transform_train(im_bbox)
 
     def __len__(self):
@@ -136,21 +137,31 @@ class WhaleDatasetTest(Dataset):
             "../Humpback-Whale-Identification-1st--master/input/test/{}".format(name))
         try:
             x0, y0, x1, y1 = self.img_bbox_dict[name]
-            im = im[int(y0):int(y1), int(x0):int(x1)]  # locate the whale tails
-            return im
+            im_bbox = im[int(y0):int(y1), int(x0):int(x1)
+                         ]  # locate the whale tails
+            im_processed = cv2.resize(im_bbox, (224, 224))
         except KeyError:
-            return im
+            im_processed = cv2.resize(im, (224, 224))
+        return im_processed
 
     def __len__(self):
         return len(self.names)
 
 
 if __name__ == '__main__':
-    IMG_PATH_TEST = "../Humpback-Whale-Identification-1st--master/input/test/"
-    image_list = np.array(os.listdir(IMG_PATH_TEST))
-    dst_test = WhaleDatasetTest(image_list)
+    # IMG_PATH_TEST = "../Humpback-Whale-Identification-1st--master/input/test/"
+    IMG_PATH_TRAIN = "../Humpback-Whale-Identification-1st--master/input/train/"
+    # image_test_list = np.array(os.listdir(IMG_PATH_TEST))
+    image_train_list = np.array(os.listdir(IMG_PATH_TRAIN))
 
-    for i, im in enumerate(dst_test):
+    # dst_test = WhaleDatasetTest(image_test_list)
+    test_casual_label = np.zeros(len(image_train_list))
+    dst_train = WhaleDatasetTrain(image_train_list, test_casual_label)
+    # for i, im in enumerate(dst_test):
+    for i, content in enumerate(dst_train):
+        im, _ = content
         if i < 4:
             plt.imshow(im)
             plt.show()
+            print(type(im))
+            print(im.shape)
