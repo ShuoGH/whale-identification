@@ -1,5 +1,4 @@
 from whaleData import *
-from imageTransform import *
 from model import *
 import matplotlib.pyplot as plt
 from PIL import Image
