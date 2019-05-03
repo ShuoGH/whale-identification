@@ -1,10 +1,11 @@
 from torch.utils.data import Dataset
-# import cv2
 from PIL import Image
 from torchvision.datasets.folder import default_loader
 import numpy as np
 import pandas as pd
 import cv2
+import matplotlib.pyplot as plt
+import os
 
 
 class WhaleDatasetTrain(Dataset):
@@ -13,44 +14,44 @@ class WhaleDatasetTrain(Dataset):
     To implement this data set:
         Put the data into ./input folder.
 
-    names: the name of image, include .jpg
-    labels: The label we transfer into is an int type data.
+    names: name of image, include .jpg
+    labels: `int` index of the whale id
     '''
 
     def __init__(self, names, labels=None, transform_train=None, min_num_classes=0):
         super(WhaleDatasetTrain, self).__init__()
         self.names = names
-        self.all_labels = labels
-
-        self.transform_train = transform_train  # implement transform
-
-        self.names_id = {Image: Id for Image,
-                         Id in zip(self.names, self.all_labels)}
-        # save the images of the same whale and count the number of each whale
-        self.id_all_names = self.mapping_id_all_names()
-
+        self.labels = labels
         self.img_bbox_dict = self.load_bbox()
 
-        # Use the min_num_classes to filter the whales with less pictures
-        self.filtered_labels = [k for k in self.id_all_names.keys()
-                                if len(self.id_all_names[k]) >= min_num_classes]
+        # self.transform_train = transform_train  # implement transform
+        # self.transform_train = transform_train  # implement transform
+        # self.names_id = {Image: Id for Image,
+        #                  Id in zip(self.names, self.all_labels)}
+        # # The following block isn's useful now
+        # # save the images of the same whale and count the number of each whale
+        # self.id_all_names = self.mapping_id_all_names()
 
-    def mapping_id_all_names(self):
-        '''
-        label: the id name of one whale
-        name: image name
-        '''
-        id_all_names = {}
-        for name, label in zip(self.names, self.all_labels):
-            if label not in id_all_names.keys():
-                id_all_names[label] = [name]
-            else:
-                id_all_names[label].append(name)
-        return id_all_names
+        # # Use the min_num_classes to filter the whales with less pictures
+        # self.filtered_labels = [k for k in self.id_all_names.keys()
+        #                         if len(self.id_all_names[k]) >= min_num_classes]
+
+    # def mapping_id_all_names(self):
+    #     '''
+    #     label: the id name of one whale
+    #     name: image name
+    #     '''
+    #     id_all_names = {}
+    #     for name, label in zip(self.names, self.all_labels):
+    #         if label not in id_all_names.keys():
+    #             id_all_names[label] = [name]
+    #         else:
+    #             id_all_names[label].append(name)
+    #     return id_all_names
 
     def load_bbox(self):
         '''
-        Loading bounding box to crop images to get better images.
+        Load the bounding box to locate whale tails.
         '''
         # Image,x0,y0,x1,y1
         print('loading bbox...')
@@ -68,23 +69,20 @@ class WhaleDatasetTrain(Dataset):
     def __getitem__(self, img_index):
         '''
         According to index to get the image
-        and return the transformed image tensor.
         '''
         name = self.names[img_index]
-        label = self.names_id[name]
-        # label_index = self.id_index[label]
-        # im = Image.open(
-        #     "../Humpback-Whale-Identification-1st--master/input/train/"+name)
+        label = self.labels[img_index]
 
-        x0, y0, x1, y1 = self.img_bbox_dict[name]
-        # im = default_loader(
-        #     "../Humpback-Whale-Identification-1st--master/input/train/{}".format(name))
         im = cv2.imread(
             "../Humpback-Whale-Identification-1st--master/input/train/{}".format(name))
-
-        im_bbox = im[int(y0):int(y1), int(x0):int(x1)]
+        try:
+            x0, y0, x1, y1 = self.img_bbox_dict[name]
+            im_bbox = im[int(y0):int(y1), int(x0):int(x1)
+                         ]  # locate the whale tails
+            return im_bbox, label
+        except KeyError:
+            return im, label
         # transformed_im = self.transform_train(im_bbox)
-        return im_bbox, label
 
     def __len__(self):
         return len(self.names)
@@ -99,27 +97,60 @@ class WhaleDatasetTest(Dataset):
         super(WhaleDatasetTest, self).__init__()
         self.names = names
 
-        self.transform_test = transform_test  # implement transform
+        # self.transform_test = transform_test  # implement transform
         self.id_list = self.load_index_id()
+        self.img_bbox_dict = self.load_bbox()
 
     def load_index_id(self):
-        # index_id_dict = {}
+        '''
+        Load csv file whick records the mapping between the id index and specific label.
+        Use the list, we will map the output to string label name.
+        '''
         index_id_map_df = pd.read_csv("./input/label.csv")
+        # index_id_dict = {}
         # for i, row in index_id_map_df.iterrows():
         #     index_id_dict[row['Id']] = row['Image']
         # return index_id_dict
         return index_id_map_df['Image']
 
-    def __getitem__(self, img_index):
+    def load_bbox(self):
         '''
-        According to index to get the image
-        and return the transformed image tensor.
+        Loading bounding box to crop images to get better images.
         '''
-        name = self.names[img_index]
-        im = self.transform_test(default_loader(
-            "../Humpback-Whale-Identification-1st--master/input/test/{}".format(name)))
+        # Image,x0,y0,x1,y1
+        # print('loading bbox...')
+        bbox = pd.read_csv('./input/bboxs.csv')
+        Images = bbox['Image'].tolist()
+        x0s = bbox['x0'].tolist()
+        y0s = bbox['y0'].tolist()
+        x1s = bbox['x1'].tolist()
+        y1s = bbox['y1'].tolist()
+        bbox_dict = {}
+        for Single_Image, x0, y0, x1, y1 in zip(Images, x0s, y0s, x1s, y1s):
+            bbox_dict[Single_Image] = [x0, y0, x1, y1]
+        return bbox_dict
 
-        return im
+    def __getitem__(self, img_index):
+        name = self.names[img_index]
+        im = cv2.imread(
+            "../Humpback-Whale-Identification-1st--master/input/test/{}".format(name))
+        try:
+            x0, y0, x1, y1 = self.img_bbox_dict[name]
+            im = im[int(y0):int(y1), int(x0):int(x1)]  # locate the whale tails
+            return im
+        except KeyError:
+            return im
 
     def __len__(self):
         return len(self.names)
+
+
+if __name__ == '__main__':
+    IMG_PATH_TEST = "../Humpback-Whale-Identification-1st--master/input/test/"
+    image_list = np.array(os.listdir(IMG_PATH_TEST))
+    dst_test = WhaleDatasetTest(image_list)
+
+    for i, im in enumerate(dst_test):
+        if i < 4:
+            plt.imshow(im)
+            plt.show()
