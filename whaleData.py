@@ -54,7 +54,7 @@ class WhaleDatasetTrain(Dataset):
         Load the bounding box to locate whale tails.
         '''
         # Image,x0,y0,x1,y1
-        print('loading bbox...')
+        # print('loading bbox...')
         bbox = pd.read_csv('./input/bboxs.csv')
         Images = bbox['Image'].tolist()
         x0s = bbox['x0'].tolist()
@@ -69,6 +69,10 @@ class WhaleDatasetTrain(Dataset):
     def __getitem__(self, img_index):
         '''
         According to index to get the image
+
+        Return: 
+            PIL image/ ndarray image: (H,W,C)
+        If you want input it into model, remember to convert it into (C,H,W)
         '''
         name = self.names[img_index]
         label = self.labels[img_index]
@@ -82,7 +86,7 @@ class WhaleDatasetTrain(Dataset):
             im_processed = cv2.resize(im_bbox, (224, 224))
         except KeyError:
             im_processed = cv2.resize(im, (224, 224))
-        return im_processed, label
+        return np.transpose(im_processed, (2, 0, 1)), label
         # transformed_im = self.transform_train(im_bbox)
 
     def __len__(self):
@@ -142,7 +146,7 @@ class WhaleDatasetTest(Dataset):
             im_processed = cv2.resize(im_bbox, (224, 224))
         except KeyError:
             im_processed = cv2.resize(im, (224, 224))
-        return im_processed
+        return np.transpose(im_processed, (2, 0, 1))
 
     def __len__(self):
         return len(self.names)
@@ -161,7 +165,8 @@ if __name__ == '__main__':
     for i, content in enumerate(dst_train):
         im, _ = content
         if i < 4:
-            plt.imshow(im)
+            # print(np.transpose(im, (1, 2, 0)).shape)
+            plt.imshow(np.transpose(im, (1, 2, 0)))
             plt.show()
             print(im.shape)
             # print(im.shape)
