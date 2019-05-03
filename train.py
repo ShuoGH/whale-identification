@@ -16,7 +16,7 @@ You need to update:
 '''
 
 if __name__ == '__main__':
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    device = "cuda:2" if torch.cuda.is_available() else "cpu"
     # min_num_class = 0
     model_name_train = "resnet50"
     # model_name_train = "resnet101"
