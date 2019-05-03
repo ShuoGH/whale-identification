@@ -95,8 +95,8 @@ if __name__ == '__main__':
                 y_batch = y_batch.to(device)
 
                 optimizer.zero_grad()
-		
-		print(X_batch.size())
+
+                print(X_batch.size())
                 outputs = model(X_batch)
                 loss = criterion(outputs, y_batch)
 
