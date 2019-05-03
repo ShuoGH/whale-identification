@@ -95,9 +95,9 @@ if __name__ == '__main__':
                 y_batch = y_batch.to(device)
 
                 optimizer.zero_grad()
-
+		
+		print(X_batch.size())
                 outputs = model(X_batch)
-                print(outputs.size())
                 loss = criterion(outputs, y_batch)
 
                 _, preds = torch.max(outputs, 1)
