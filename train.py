@@ -16,7 +16,7 @@ You need to update:
 '''
 
 if __name__ == '__main__':
-    device = "cuda:2" if torch.cuda.is_available() else "cpu"
+    device = "cuda:3" if torch.cuda.is_available() else "cpu"
     # min_num_class = 0
     model_name_train = "resnet50"
     # model_name_train = "resnet101"
@@ -91,7 +91,7 @@ if __name__ == '__main__':
             running_loss = 0.0
             running_corrects = 0
             for X_batch, y_batch in tqdm(dataloaders_dict[phase]):
-                X_batch = X_batch.to(device)
+                X_batch = X_batch.to(device, dtype = torch.float)
                 y_batch = y_batch.to(device)
 
                 optimizer.zero_grad()

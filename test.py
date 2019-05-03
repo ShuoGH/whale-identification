@@ -14,7 +14,7 @@ You need to update:
     - csv.to(xxxxxx)
 '''
 if __name__ == '__main__':
-    device = "cuda:2" if torch.cuda.is_available() else "cpu"
+    device = "cuda:3" if torch.cuda.is_available() else "cpu"
 
     num_classes = 5005
     model_name = "resnet50"
@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     test_classnames = []
     for test_batch in tqdm(dataloader_test):
-        test_batch = test_batch.to('cuda')
+        test_batch = test_batch.to(device, dtype = torch.fload)
         outputs = model(test_batch)
         predinds = torch.argsort(outputs, dim=1, descending=True)[:, :5]
 
