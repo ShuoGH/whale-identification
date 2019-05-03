@@ -97,6 +97,7 @@ if __name__ == '__main__':
                 optimizer.zero_grad()
 
                 outputs = model(X_batch)
+                print(outputs.size())
                 loss = criterion(outputs, y_batch)
 
                 _, preds = torch.max(outputs, 1)

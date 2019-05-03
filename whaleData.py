@@ -163,5 +163,5 @@ if __name__ == '__main__':
         if i < 4:
             plt.imshow(im)
             plt.show()
-            print(type(im))
             print(im.shape)
+            # print(im.shape)
