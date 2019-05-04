@@ -1,0 +1,9 @@
+matplotlib==3.0.3
+numpy==1.15.4
+opencv-python==4.1.0.25
+pandas==0.24.1
+Pillow==5.4.1
+torch==1.0.1
+torchvision==0.2.1
+tqdm==4.31.1
+
