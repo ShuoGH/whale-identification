@@ -24,7 +24,7 @@ if __name__ == '__main__':
                         inchannels=3, model_name=model_name).to(device)
 
     model.load_state_dict(torch.load(
-        './trained_model/{}_3thMay.model'.format(model_name)))
+        './trained_model/{}_4thMay_no_freeze.model'.format(model_name)))
 
     model.eval()
 
@@ -51,4 +51,4 @@ if __name__ == '__main__':
 
     testdf = pd.DataFrame({'Image': images_test, 'Id': test_classnames})
     testdf.to_csv(
-        './results/submission_{}_3thMay.csv'.format(model_name), index=False)
+        './results/submission_{}_4thMay_no_freeze.csv'.format(model_name), index=False)

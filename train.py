@@ -68,7 +68,7 @@ if __name__ == '__main__':
     num_classes = 5005
     model = model_whale(num_classes=num_classes,
                         inchannels=3, model_name=model_name_train).to(device)
-    model.freeze()
+    # model.freeze()
     optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad,
                                        model.parameters()), lr=0.001, momentum=0.9)
     criterion = nn.CrossEntropyLoss()
@@ -131,4 +131,4 @@ if __name__ == '__main__':
     model.load_state_dict(best_model_wts)
 
     torch.save(model.state_dict(),
-               './trained_model/{}_3thMay.model'.format(model_name_train))
+               './trained_model/{}_4thMay_no_freeze.model'.format(model_name_train))
