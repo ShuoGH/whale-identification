@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     test_classnames = []
     for test_batch in tqdm(dataloader_test):
-        test_batch = test_batch.to(device, dtype = torch.fload)
+        test_batch = test_batch.to(device, dtype = torch.float)
         outputs = model(test_batch)
         predinds = torch.argsort(outputs, dim=1, descending=True)[:, :5]
 
