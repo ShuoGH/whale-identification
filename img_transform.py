@@ -7,6 +7,7 @@ import random
 import numpy as np
 import pandas as pd
 from skimage.transform import warp, AffineTransform, ProjectiveTransform
+from torchvision import transforms
 
 '''
 This module is to define some functions related to the image transforms.
@@ -26,6 +27,22 @@ Reference:
     1. 1st code https://www.kaggle.com/c/humpback-whale-identification/discussion/82366
     2. some code from image-augmentation https://www.kaggle.com/safavieh/image-augmentation-using-skimage
 '''
+
+
+def transforms_img():
+    '''
+    Just basic transform of the images
+    '''
+    normalize = transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225])
+    preprocess = transforms.Compose([
+        transforms.Grayscale(num_output_channels=3),
+        transforms.Resize(224),
+        transforms.ToTensor(),
+        normalize
+    ])
+    return preprocess
 
 
 def load_bbox():

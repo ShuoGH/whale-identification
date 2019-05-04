@@ -6,6 +6,7 @@ import pandas as pd
 import cv2
 import matplotlib.pyplot as plt
 import os
+from img_transform import *
 
 
 class WhaleDatasetTrain(Dataset):
@@ -23,8 +24,8 @@ class WhaleDatasetTrain(Dataset):
         self.names = names
         self.labels = labels
         self.img_bbox_dict = self.load_bbox()
+        self.transform = transform_train  # implement transform
 
-        # self.transform_train = transform_train  # implement transform
         # self.transform_train = transform_train  # implement transform
         # self.names_id = {Image: Id for Image,
         #                  Id in zip(self.names, self.all_labels)}
@@ -83,11 +84,12 @@ class WhaleDatasetTrain(Dataset):
             x0, y0, x1, y1 = self.img_bbox_dict[name]
             im_bbox = im[int(y0):int(y1), int(x0):int(x1)
                          ]  # locate the whale tails
-            im_processed = cv2.resize(im_bbox, (224, 224))
+            im_processed = Image.fromarray(im_bbox)
         except KeyError:
-            im_processed = cv2.resize(im, (224, 224))
-        return np.transpose(im_processed, (2, 0, 1)), label
-        # transformed_im = self.transform_train(im_bbox)
+            im_processed = Image.fromarray(im)
+        transformed_im = self.transform(im_processed)
+
+        return transformed_im, label
 
     def __len__(self):
         return len(self.names)
@@ -105,6 +107,7 @@ class WhaleDatasetTest(Dataset):
         # self.transform_test = transform_test  # implement transform
         self.id_list = self.load_index_id()
         self.img_bbox_dict = self.load_bbox()
+        self.transform = transform_test
 
     def load_index_id(self):
         '''
@@ -143,10 +146,12 @@ class WhaleDatasetTest(Dataset):
             x0, y0, x1, y1 = self.img_bbox_dict[name]
             im_bbox = im[int(y0):int(y1), int(x0):int(x1)
                          ]  # locate the whale tails
-            im_processed = cv2.resize(im_bbox, (224, 224))
+            im_processed = Image.fromarray(im_bbox)
         except KeyError:
-            im_processed = cv2.resize(im, (224, 224))
-        return np.transpose(im_processed, (2, 0, 1))
+            im_processed = Image.fromarray(im)
+        transformed_im = self.transform(im_processed)
+
+        return transformed_im
 
     def __len__(self):
         return len(self.names)
@@ -160,7 +165,8 @@ if __name__ == '__main__':
 
     # dst_test = WhaleDatasetTest(image_test_list)
     test_casual_label = np.zeros(len(image_train_list))
-    dst_train = WhaleDatasetTrain(image_train_list, test_casual_label)
+    dst_train = WhaleDatasetTrain(
+        image_train_list, test_casual_label, transform_train=transforms_img())
     # for i, im in enumerate(dst_test):
     for i, content in enumerate(dst_train):
         im, _ = content

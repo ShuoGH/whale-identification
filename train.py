@@ -9,6 +9,7 @@ from sklearn.model_selection import ShuffleSplit
 import copy
 from tqdm import tqdm
 import time
+import img_transform
 '''
 When you update the train.py to test more mdoel:
 You need to update:
@@ -16,7 +17,7 @@ You need to update:
 '''
 
 if __name__ == '__main__':
-    device = "cuda:3" if torch.cuda.is_available() else "cpu"
+    device = "cuda:1" if torch.cuda.is_available() else "cpu"
     # min_num_class = 0
     model_name_train = "resnet50"
     # model_name_train = "resnet101"
@@ -45,22 +46,11 @@ if __name__ == '__main__':
                    for phase in ['train', 'val']}
     labelsId_dict = {phase: labelId_train[idxs[phase]]
                      for phase in ['train', 'val']}
-    # #  I will not use transform in this time 3th May
-    # norm = transforms.Normalize(
-    #     mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    # ---- Transform operation from img_transform module----
+    transform_img = img_transform.transforms_img()
 
-    # transforms_dict = {
-    #     'train': transforms.Compose([transforms.RandomResizedCrop(224),
-    #                                  transforms.RandomHorizontalFlip(),
-    #                                  transforms.ToTensor(),
-    #                                  norm]),
-    #     'val': transforms.Compose([transforms.Resize(224),
-    #                                transforms.CenterCrop(224),
-    #                                transforms.ToTensor(),
-    #                                norm])
-    # }
     datasets_dict = {phase: WhaleDatasetTrain(
-        images_dict[phase], labelsId_dict[phase]) for phase in ['train', 'val']}
+        images_dict[phase], labelsId_dict[phase], transform_train=transform_img) for phase in ['train', 'val']}
     dataloaders_dict = {phase: torch.utils.data.DataLoader(datasets_dict[phase], batch_size=32, shuffle=True, num_workers=1, pin_memory=True)
                         for phase in ['train', 'val']}
 
@@ -91,7 +81,7 @@ if __name__ == '__main__':
             running_loss = 0.0
             running_corrects = 0
             for X_batch, y_batch in tqdm(dataloaders_dict[phase]):
-                X_batch = X_batch.to(device, dtype = torch.float)
+                X_batch = X_batch.to(device, dtype=torch.float)
                 y_batch = y_batch.to(device)
 
                 optimizer.zero_grad()
@@ -131,4 +121,4 @@ if __name__ == '__main__':
     model.load_state_dict(best_model_wts)
 
     torch.save(model.state_dict(),
-               './trained_model/{}_4thMay_no_freeze.model'.format(model_name_train))
+               './trained_model/{}_4thMay_no_freeze_add_transform.model'.format(model_name_train))
