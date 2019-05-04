@@ -6,7 +6,7 @@ import os
 import random
 import numpy as np
 import pandas as pd
-from skimage.transform import warp, AffineTransform, ProjectiveTransform
+# from skimage.transform import warp, AffineTransform, ProjectiveTransform
 from torchvision import transforms
 
 '''
@@ -92,33 +92,33 @@ def random_crop(im):
     return im[start[0]:end[0], start[1]:end[1]]
 
 
-def random_affine(image):
-    '''
-    wrapper of Affine transformation with random scale, rotation, shear and translation parameters
+# def random_affine(image):
+#     '''
+#     wrapper of Affine transformation with random scale, rotation, shear and translation parameters
 
-    Note: 
-        actually, when I have bounding box, I don't need to use the affine transform.
-    '''
-    tform = AffineTransform(scale=(random.uniform(0.75, 1.3), random.uniform(0.75, 1.3)),
-                            rotation=random.uniform(-0.25, 0.25),
-                            shear=random.uniform(-0.2, 0.2),
-                            translation=(random.uniform(-im.shape[0]//10, im.shape[0]//10),
-                                         random.uniform(-im.shape[1]//10, im.shape[1]//10)))
-    return warp(image, tform.inverse, mode='reflect')
+#     Note:
+#         actually, when I have bounding box, I don't need to use the affine transform.
+#     '''
+#     tform = AffineTransform(scale=(random.uniform(0.75, 1.3), random.uniform(0.75, 1.3)),
+#                             rotation=random.uniform(-0.25, 0.25),
+#                             shear=random.uniform(-0.2, 0.2),
+#                             translation=(random.uniform(-im.shape[0]//10, im.shape[0]//10),
+#                                          random.uniform(-im.shape[1]//10, im.shape[1]//10)))
+#     return warp(image, tform.inverse, mode='reflect')
 
 
-def random_horizintal_flip(image, p=0.5):
-    '''
-    Random decide whether the image should be flipped horizintal.
+# def random_horizintal_flip(image, p=0.5):
+#     '''
+#     Random decide whether the image should be flipped horizintal.
 
-    You'd better not to use this, since it will confuse the learning system in this problem. As @earhian note in https://www.kaggle.com/c/humpback-whale-identification/discussion/82366.
-    '''
-    if random.random() < p:
-        if len(image.shape) == 2:
-            image = np.flip(image, 1)
-        elif len(image.shape) == 3:
-            image = np.flip(image, 1)
-    return image
+#     You'd better not to use this, since it will confuse the learning system in this problem. As @earhian note in https://www.kaggle.com/c/humpback-whale-identification/discussion/82366.
+#     '''
+#     if random.random() < p:
+#         if len(image.shape) == 2:
+#             image = np.flip(image, 1)
+#         elif len(image.shape) == 3:
+#             image = np.flip(image, 1)
+#     return image
 
 
 if __name__ == '__main__':
@@ -137,7 +137,7 @@ if __name__ == '__main__':
             im_bbox = locate_bounding_box(img_name, im, bbox_dict)
             plt.imshow(im_bbox)
             plt.show()
-            im_processed = random_crop(im_bbox)
+            # im_processed = random_crop(im_bbox)
             # print(im_processed.shape)
             plt.imshow(im_processed)
             plt.show()
