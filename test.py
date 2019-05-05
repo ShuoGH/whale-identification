@@ -13,6 +13,9 @@ When you update the test.py to test more mdoel:
 You need to update:
     - model.load(xxxxxx)
     - csv.to(xxxxxx)
+
+You need to set proper threshold to classifi new_whale.
+    - when you are doing testing 
 '''
 if __name__ == '__main__':
     device = "cuda:1" if torch.cuda.is_available() else "cpu"
@@ -25,7 +28,7 @@ if __name__ == '__main__':
                         inchannels=3, model_name=model_name).to(device)
 
     model.load_state_dict(torch.load(
-        './trained_model/{}_4thMay_no_freeze_add_transform.model'.format(model_name)))
+        './trained_model/{}_5thMay_oversample_no_new_whale.model'.format(model_name)))
 
     model.eval()
 
@@ -56,4 +59,4 @@ if __name__ == '__main__':
 
     testdf = pd.DataFrame({'Image': images_test, 'Id': test_classnames})
     testdf.to_csv(
-        './results/submission_{}_4thMay_no_freeze_add_transform.csv'.format(model_name), index=False)
+        './results/submission_{}_5thMay_oversample_no_new_whale.csv'.format(model_name), index=False)

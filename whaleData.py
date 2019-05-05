@@ -19,36 +19,12 @@ class WhaleDatasetTrain(Dataset):
     labels: `int` index of the whale id
     '''
 
-    def __init__(self, names, labels=None, transform_train=None, min_num_classes=0):
+    def __init__(self, names, labels=None, transform_train=None):
         super(WhaleDatasetTrain, self).__init__()
         self.names = names
         self.labels = labels
         self.img_bbox_dict = self.load_bbox()
         self.transform = transform_train  # implement transform
-
-        # self.transform_train = transform_train  # implement transform
-        # self.names_id = {Image: Id for Image,
-        #                  Id in zip(self.names, self.all_labels)}
-        # # The following block isn's useful now
-        # # save the images of the same whale and count the number of each whale
-        # self.id_all_names = self.mapping_id_all_names()
-
-        # # Use the min_num_classes to filter the whales with less pictures
-        # self.filtered_labels = [k for k in self.id_all_names.keys()
-        #                         if len(self.id_all_names[k]) >= min_num_classes]
-
-    # def mapping_id_all_names(self):
-    #     '''
-    #     label: the id name of one whale
-    #     name: image name
-    #     '''
-    #     id_all_names = {}
-    #     for name, label in zip(self.names, self.all_labels):
-    #         if label not in id_all_names.keys():
-    #             id_all_names[label] = [name]
-    #         else:
-    #             id_all_names[label].append(name)
-    #     return id_all_names
 
     def load_bbox(self):
         '''
@@ -71,7 +47,7 @@ class WhaleDatasetTrain(Dataset):
         '''
         According to index to get the image
 
-        Return: 
+        Return:
             PIL image/ ndarray image: (H,W,C)
         If you want input it into model, remember to convert it into (C,H,W)
         '''
@@ -176,3 +152,5 @@ if __name__ == '__main__':
             plt.show()
             print(im.shape)
             # print(im.shape)
+
+    # 2000+ id only have one image

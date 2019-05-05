@@ -10,57 +10,93 @@ import copy
 from tqdm import tqdm
 import time
 import img_transform
+import random
 '''
 When you update the train.py to test more mdoel:
 You need to update:
     - model.save(xxxxxx)
+
+Try to set: 
+    - another optimizer: Adam
 '''
+
+
+def load_label_index_dict():
+    '''
+    Return the dict of the mappinp:
+        image label -> index id
+    '''
+    id_index_dict = {}
+    index_id_map_df = pd.read_csv("./input/label.csv")
+    for i, j in index_id_map_df.iterrows():
+        id_index_dict[j['Image']] = j['Id']
+    return id_index_dict
+
+
+def load_oversampled_data():
+    '''
+    Load the oversampled train data from .csv file.
+    return:
+        - oversampled train data frame
+        - 2931 val data: pick image from 2931 kinds of whales that own at least 2 images
+    '''
+    data_train = pd.read_csv('./input/oversampled_train_data.csv')
+    data_val = pd.read_csv('./input/val_data.csv')
+    return data_train, data_val
+
 
 if __name__ == '__main__':
     device = "cuda:1" if torch.cuda.is_available() else "cpu"
-    # min_num_class = 0
+
     model_name_train = "resnet50"
     # model_name_train = "resnet101"
 
-    data_train = pd.read_csv('./input/train.csv')
-    names_train = data_train['Image'].values
-    labels_train = data_train['Id'].values
+    # ---- load the oversampled data and selected val data
+    data_train, data_val = load_oversampled_data()
 
-    # ---- convert the string label to int id ----
-    unique_labels_value = np.unique(labels_train)
-    unique_label_index_dict = {}
-    unique_index_label_dict = {}
-    for i in range(len(unique_labels_value)):
-        unique_label_index_dict[unique_labels_value[i]] = i
-        unique_index_label_dict[i] = unique_labels_value[i]
-    labelId_train = np.array([unique_label_index_dict[label]
-                              for label in labels_train])
+    '''
+    *****************
+    reference:
+        - @radek https://github.com/radekosmulski/whale
+    '''
 
-    # ---- Split the train and val data sets ----
-    splitter = ShuffleSplit(n_splits=1, test_size=0.1)
-    # splitter is a generator and the nun of iteration is only 1, so use next to get the result of splitting
-    (train_idxs, val_idxs) = next(splitter.split(names_train, labelId_train))
-    idxs = {'train': train_idxs, 'val': val_idxs}
-
-    images_dict = {phase: names_train[idxs[phase]]
-                   for phase in ['train', 'val']}
-    labelsId_dict = {phase: labelId_train[idxs[phase]]
-                     for phase in ['train', 'val']}
     # ---- Transform operation from img_transform module----
     transform_img = img_transform.transforms_img()
 
-    datasets_dict = {phase: WhaleDatasetTrain(
-        images_dict[phase], labelsId_dict[phase], transform_train=transform_img) for phase in ['train', 'val']}
+    # ---- convert the string label to int id ----
+    id_index_dict = load_label_index_dict()  # dict: map label -> index id
+    indexId_data_train = [id_index_dict[label]
+                          for label in data_train['Id']]
+    indexId_data_val = [id_index_dict[label]
+                        for label in data_val['Id']]
+    # ---- initialize train and val data----
+    whale_train_data = WhaleDatasetTrain(
+        data_train, indexId_data_train, transform_train=transforms_img)
+    whale_val_data = WhaleDatasetTrain(
+        data_val, indexId_data_val, transform_train=transforms_img)
+
+    datasets_dict = {'train': whale_train_data, 'val': whale_val_data}
+
     dataloaders_dict = {phase: torch.utils.data.DataLoader(datasets_dict[phase], batch_size=32, shuffle=True, num_workers=1, pin_memory=True)
                         for phase in ['train', 'val']}
 
     # test the pretrained model
-    num_classes = 5005
+    # Now there will no new_whale in our training phase
+    # Only in test phase, I will give a threshold to tell which value is better to get higher LB score.
+    num_classes = 5004
+
+    '''
+    end of the new demand of `no_new_whale` branch.
+    '''
+
     model = model_whale(num_classes=num_classes,
                         inchannels=3, model_name=model_name_train).to(device)
     # model.freeze()
     optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad,
                                        model.parameters()), lr=0.001, momentum=0.9)
+    # optimiser = optim.Adam(
+    #     filter(lambda p: p.requires_grad, model.parameters()), lr=1e-4)
+
     criterion = nn.CrossEntropyLoss()
     NUM_EPOCHS = 30
 
@@ -121,4 +157,4 @@ if __name__ == '__main__':
     model.load_state_dict(best_model_wts)
 
     torch.save(model.state_dict(),
-               './trained_model/{}_4thMay_no_freeze_add_transform.model'.format(model_name_train))
+               './trained_model/{}_5thMay_oversample_no_new_whale.model'.format(model_name_train))
