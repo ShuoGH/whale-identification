@@ -77,6 +77,7 @@ if __name__ == '__main__':
         # Assume the threshold of probability is 0.9
         predinds_result = np.array([[0] + j[:4] if i == 1 else j[:5]
                                     for i, j in zip(detect_new_whale_index, predinds)])
+
         whale_labels = index_id[predinds_result].tolist()
 
         test_classnames.extend([" ".join(s) for s in whale_labels])
