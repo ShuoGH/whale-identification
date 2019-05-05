@@ -7,6 +7,7 @@ import cv2
 import matplotlib.pyplot as plt
 import os
 from img_transform import *
+import img_transform
 
 
 class WhaleDatasetTrain(Dataset):
@@ -132,6 +133,28 @@ class WhaleDatasetTest(Dataset):
 
 
 if __name__ == '__main__':
+    # The following is just for testing
+
+    def transform_train_img(img):
+        '''
+        input: cv2.imread image. 
+        return: transformed PIL from torchvision.transform
+
+        '''
+        # do a series of transform on images
+        img_processed = img_transform.random_gaussian_noise(img, sigma=0.1)
+        img_processed = img_transform.random_angle_rotate(img_processed)
+        img_processed = img_transform.random_crop(img_processed)
+        img = Image.fromarray(img_processed)
+
+        transform_basic = img_transform.transforms_img()
+        return transform_basic(img)
+
+    def transform_val_img(img):
+        img = Image.fromarray(img)
+        transform_basic = img_transform.transforms_img()
+        return transform_basic(img)
+
     # IMG_PATH_TEST = "../Humpback-Whale-Identification-1st--master/input/test/"
     IMG_PATH_TRAIN = "../Humpback-Whale-Identification-1st--master/input/train/"
     # image_test_list = np.array(os.listdir(IMG_PATH_TEST))
@@ -140,15 +163,21 @@ if __name__ == '__main__':
     # dst_test = WhaleDatasetTest(image_test_list)
     test_casual_label = np.zeros(len(image_train_list))
     dst_train = WhaleDatasetTrain(
-        image_train_list, test_casual_label, transform_train=transforms_img())
-    # for i, im in enumerate(dst_test):
-    for i, content in enumerate(dst_train):
-        im, _ = content
-        if i < 4:
-            # print(np.transpose(im, (1, 2, 0)).shape)
-            plt.imshow(np.transpose(im, (1, 2, 0)))
-            plt.show()
-            print(im.shape)
-            # print(im.shape)
+        image_train_list, test_casual_label, transform_train=transform_train_img)
 
-    # 2000+ id only have one image
+    # for i, content in enumerate(dst_train):
+    #     im, im_label = content
+    #     if i < 4:
+    #         # print(np.transpose(im, (1, 2, 0)).shape)
+    #     plt.imshow(np.transpose(im, (1, 2, 0)))
+    #     plt.show()
+    #     print(im.shape)
+    #     print(im_label)
+    #     # print(im.shape)
+
+    # # 2000+ id only have one image
+
+    data_loader = torch.utils.data.DataLoader(
+        dst_train, batch_size=1, shuffle=True, num_workers=0, pin_memory=True)
+    for i, j in data_loader:
+        print(i.size(), j.size())

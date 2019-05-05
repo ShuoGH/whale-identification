@@ -75,7 +75,8 @@ if __name__ == '__main__':
 
     # ---- load the oversampled data and selected val data
     data_train, data_val = load_oversampled_data()
-
+    train_data_name = data_train['Image']
+    val_data_name = data_val['Image']
     '''
     *****************
     reference:
@@ -90,13 +91,13 @@ if __name__ == '__main__':
                         for label in data_val['Id']]
     # ---- initialize train and val data----
     whale_train_data = WhaleDatasetTrain(
-        data_train, indexId_data_train, transform_train=transform_train_img)
+        train_data_name, indexId_data_train, transform_train=transform_train_img)
     whale_val_data = WhaleDatasetTrain(
-        data_val, indexId_data_val, transform_train=transform_val_img)
+        val_data_name, indexId_data_val, transform_train=transform_val_img)
 
     datasets_dict = {'train': whale_train_data, 'val': whale_val_data}
 
-    dataloaders_dict = {phase: torch.utils.data.DataLoader(datasets_dict[phase], batch_size=32, shuffle=True, num_workers=1, pin_memory=True)
+    dataloaders_dict = {phase: torch.utils.data.DataLoader(datasets_dict[phase], batch_size=32, shuffle=True, num_workers=0, pin_memory=True)
                         for phase in ['train', 'val']}
 
     # test the pretrained model
@@ -136,7 +137,7 @@ if __name__ == '__main__':
             running_loss = 0.0
             running_corrects = 0
             for X_batch, y_batch in tqdm(dataloaders_dict[phase]):
-                X_batch = X_batch.to(device, dtype=torch.float)
+                X_batch = X_batch.to(device)
                 y_batch = y_batch.to(device)
 
                 optimizer.zero_grad()

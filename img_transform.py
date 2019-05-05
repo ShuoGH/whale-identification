@@ -75,7 +75,7 @@ def random_crop(im, p=0.5):
     croping the image
     '''
     if random.random() < p:
-        margin = 1/4
+        margin = 1/5
         start = [int(random.uniform(0, im.shape[0] * margin)),
                  int(random.uniform(0, im.shape[1] * margin))]
         end = [int(random.uniform(im.shape[0] * (1-margin), im.shape[0])),
@@ -119,12 +119,13 @@ def rotate(image, angle, center=None, scale=1.0):
     return rotated
 
 
-def random_angle_rotate(image, angles=[-30, 30]):
+def random_angle_rotate(image, angles=[-30, 30], p=0.5):
     '''
     I'm not sure whether the rotate will cause the performance, since after rotating, there are some black space in the image
     '''
-    angle = random.randint(0, angles[1]-angles[0]) + angles[0]
-    image = rotate(image, angle)
+    if random.random() < p:
+        angle = random.randint(0, angles[1]-angles[0]) + angles[0]
+        image = rotate(image, angle)
     return image
 
 
