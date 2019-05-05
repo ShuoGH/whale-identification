@@ -60,12 +60,11 @@ class WhaleDatasetTrain(Dataset):
             x0, y0, x1, y1 = self.img_bbox_dict[name]
             im_bbox = im[int(y0):int(y1), int(x0):int(x1)
                          ]  # locate the whale tails
-            im_processed = Image.fromarray(im_bbox)
+            im_processed = self.transform(im_bbox)
         except KeyError:
-            im_processed = Image.fromarray(im)
-        transformed_im = self.transform(im_processed)
+            im_processed = self.transform(im)
 
-        return transformed_im, label
+        return im_processed, label
 
     def __len__(self):
         return len(self.names)
@@ -122,12 +121,11 @@ class WhaleDatasetTest(Dataset):
             x0, y0, x1, y1 = self.img_bbox_dict[name]
             im_bbox = im[int(y0):int(y1), int(x0):int(x1)
                          ]  # locate the whale tails
-            im_processed = Image.fromarray(im_bbox)
+            im_processed = self.transform(im_bbox)
         except KeyError:
-            im_processed = Image.fromarray(im)
-        transformed_im = self.transform(im_processed)
+            im_processed = self.transform(im)
 
-        return transformed_im
+        return im_processed
 
     def __len__(self):
         return len(self.names)

@@ -31,7 +31,11 @@ Reference:
 
 def transforms_img():
     '''
-    Just basic transform of the images
+    Just basic transform of the images.
+    input: 
+        PIL image data type
+    return: 
+        PIL to tensor
     '''
     normalize = transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
@@ -45,36 +49,83 @@ def transforms_img():
     return preprocess
 
 
-def random_gaussian_noise():
+def random_gaussian_noise(image, sigma=0.5):
     '''
-    random add gaussian noise
+    add random gaussian noise.
+
+    But i'm not sure whether to use this
     '''
-    pass
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    gray, a, b = cv2.split(lab)
+    gray = gray.astype(np.float32)/255
+    H, W = gray.shape
+
+    noise = np.random.normal(0, sigma, (H, W))
+    noisy = gray + noise
+
+    noisy = (np.clip(noisy, 0, 1)*255).astype(np.uint8)
+    lab = cv2.merge((noisy, a, b))
+    image = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+
+    return image
 
 
-def random_crop(im):
+def random_crop(im, p=0.5):
     '''
     croping the image
     '''
-    margin = 1/4
-    start = [int(random.uniform(0, im.shape[0] * margin)),
-             int(random.uniform(0, im.shape[1] * margin))]
-    end = [int(random.uniform(im.shape[0] * (1-margin), im.shape[0])),
-           int(random.uniform(im.shape[1] * (1-margin), im.shape[1]))]
-    return im[start[0]:end[0], start[1]:end[1]]
+    if random.random() < p:
+        margin = 1/4
+        start = [int(random.uniform(0, im.shape[0] * margin)),
+                 int(random.uniform(0, im.shape[1] * margin))]
+        end = [int(random.uniform(im.shape[0] * (1-margin), im.shape[0])),
+               int(random.uniform(im.shape[1] * (1-margin), im.shape[1]))]
+        return im[start[0]:end[0], start[1]:end[1]]
+    else:
+        return im
+
+
+def random_erase(image, p=0.5):
+    '''
+    It just erase a bit of space in the picture
+    '''
+    if random.random() < p:
+        width, height, d = image.shape
+        x = random.randint(0, width)
+        y = random.randint(0, height)
+        b_w = random.randint(0, 100)
+        b_h = random.randint(0, 100)
+        image[x:x+b_w, y:y+b_h] = 0
+    return image
 
 
 def random_affine(image):
     '''
-
+    random implement the affine transform
     '''
+
     pass
 
 
-def random_rotate(image):
+def rotate(image, angle, center=None, scale=1.0):
+    (h, w) = image.shape[:2]
+
+    if center is None:
+        center = (w / 2, h / 2)
+
+    M = cv2.getRotationMatrix2D(center, angle, scale)
+    rotated = cv2.warpAffine(image, M, (w, h))
+
+    return rotated
+
+
+def random_angle_rotate(image, angles=[-30, 30]):
     '''
+    I'm not sure whether the rotate will cause the performance, since after rotating, there are some black space in the image
     '''
-    pass
+    angle = random.randint(0, angles[1]-angles[0]) + angles[0]
+    image = rotate(image, angle)
+    return image
 
 
 def random_horizintal_flip(image, p=0.5):
@@ -109,10 +160,31 @@ if __name__ == '__main__':
             plt.imshow(im)
             plt.show()
 
-            # im_processed = random_crop(im_bbox)
-            transform_train = transforms_img()
-            im_processed = transform_train(Image.fromarray(im))
-            print(im_processed.shape)
+            # # im_processed = random_crop(im_bbox)
 
-            plt.imshow(np.transpose(np.array(im_processed), (1, 2, 0)))
+            # 2. test adding gaussian noise
+            im_processed = random_gaussian_noise(im, sigma=0.1)
+            plt.imshow(im_processed)
             plt.show()
+
+            # # 3. test random cropping
+            # im_processed = random_crop(im)
+            # plt.imshow(im_processed)
+            # plt.show()
+
+            # # 3. test random angle rotate
+            # im_processed = random_angle_rotate(im)
+            # plt.imshow(im_processed)
+            # plt.show()
+
+            # # 1. test basic transform
+            # transform_train = transforms_img()
+            # im_processed_2 = transform_train(Image.fromarray(im_processed))
+            # print(im_processed_2.shape)
+            # plt.imshow(np.transpose(np.array(im_processed_2), (1, 2, 0)))
+            # plt.show()
+
+            # # 3. test random erase
+            # im_processed = random_erase(im)
+            # plt.imshow(im_processed)
+            # plt.show()

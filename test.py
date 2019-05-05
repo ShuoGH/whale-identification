@@ -14,8 +14,12 @@ You need to update:
     - model.load(xxxxxx)
     - csv.to(xxxxxx)
 
+
+*******
 You need to set proper threshold to classifi new_whale.
     - when you are doing testing 
+You also need to set the transform operation since you have edit it.
+    - transform on the test whaledataset
 '''
 if __name__ == '__main__':
     device = "cuda:1" if torch.cuda.is_available() else "cpu"

@@ -45,6 +45,28 @@ def load_oversampled_data():
     return data_train, data_val
 
 
+def transform_train_img(img):
+    '''
+    input: cv2.imread image. 
+    return: transformed PIL from torchvision.transform
+
+    '''
+    # do a series of transform on images
+    img_processed = img_transform.random_gaussian_noise(img, sigma=0.1)
+    img_processed = img_transform.random_angle_rotate(img_processed)
+    img_processed = img_transform.random_crop(img_processed)
+    img = Image.fromarray(img_processed)
+
+    transform_basic = img_transform.transforms_img()
+    return transform_basic(img)
+
+
+def transform_val_img(img):
+    img = Image.fromarray(img)
+    transform_basic = img_transform.transforms_img()
+    return transform_basic(img)
+
+
 if __name__ == '__main__':
     device = "cuda:1" if torch.cuda.is_available() else "cpu"
 
@@ -60,9 +82,6 @@ if __name__ == '__main__':
         - @radek https://github.com/radekosmulski/whale
     '''
 
-    # ---- Transform operation from img_transform module----
-    transform_img = img_transform.transforms_img()
-
     # ---- convert the string label to int id ----
     id_index_dict = load_label_index_dict()  # dict: map label -> index id
     indexId_data_train = [id_index_dict[label]
@@ -71,9 +90,9 @@ if __name__ == '__main__':
                         for label in data_val['Id']]
     # ---- initialize train and val data----
     whale_train_data = WhaleDatasetTrain(
-        data_train, indexId_data_train, transform_train=transforms_img)
+        data_train, indexId_data_train, transform_train=transform_train_img)
     whale_val_data = WhaleDatasetTrain(
-        data_val, indexId_data_val, transform_train=transforms_img)
+        data_val, indexId_data_val, transform_train=transform_val_img)
 
     datasets_dict = {'train': whale_train_data, 'val': whale_val_data}
 
