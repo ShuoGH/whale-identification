@@ -3,4 +3,5 @@
 *.out
 results
 trained_model
-
+*.pyc
+__pycache__
