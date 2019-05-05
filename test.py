@@ -17,14 +17,18 @@ You need to update:
 
 *******
 You need to set proper threshold to classifi new_whale.
-    - when you are doing testing 
+    - when you are doing testing
 You also need to set the transform operation since you have edit it.
     - transform on the test whaledataset
+
+In the training phase, the CrossEntropy have calculated the softmax value, I don't need to add the softmax layer in my model.
+In the testing phase, if I want to get the probabilities of each class, then I need to add a `nn.Softmax` by my self.
 '''
 if __name__ == '__main__':
     device = "cuda:1" if torch.cuda.is_available() else "cpu"
 
-    num_classes = 5005
+    # the train data we used have 5004 whale ids
+    num_classes = 5004
     model_name = "resnet50"
     # model_name = "resnet101"
 
@@ -52,12 +56,28 @@ if __name__ == '__main__':
     index_id = np.array(dataset_test.id_list)
 
     test_classnames = []
+
+    softmax_output = torch.nn.Softmax()
     for test_batch in tqdm(dataloader_test):
         test_batch = test_batch.to(device, dtype=torch.float)
         outputs = model(test_batch)
-        predinds = torch.argsort(outputs, dim=1, descending=True)[:, :5]
+        '''
+        Try the threshold with 0.9
+        '''
+        # Calculate the softmax output which represent the probability
+        # Ouputs: 32*5004
+        probability_outputs = softmax_output(outputs)
+        detect_new_whale_index = [1 if torch.max(
+            single_output) > 0.90 else 0 for single_output in probability_outputs]
 
-        whale_labels = index_id[predinds.to('cpu').detach().numpy()].tolist()
+        # predinds = torch.argsort(outputs, dim=1, descending=True)[:, :5]
+        predinds = torch.argsort(
+            probability_output, dim=1, descending=True)[:, :5].to('cpu').detach().numpy()
+
+        # Assume the threshold of probability is 0.9
+        predinds_result = np.array([[0] + j[:4] if i == 1 else j[:5]
+                                    for i, j in zip(detect_new_whale_index, predinds)])
+        whale_labels = index_id[predinds_result].tolist()
 
         test_classnames.extend([" ".join(s) for s in whale_labels])
 
