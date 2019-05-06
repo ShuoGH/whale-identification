@@ -42,7 +42,7 @@ def transforms_img():
         std=[0.229, 0.224, 0.225])
     preprocess = transforms.Compose([
         transforms.Grayscale(num_output_channels=3),
-        transforms.Resize((448, 448)),
+        transforms.Resize((224, 224)),
         transforms.ToTensor(),
         normalize
     ])
