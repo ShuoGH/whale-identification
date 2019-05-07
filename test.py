@@ -24,6 +24,14 @@ You also need to set the transform operation since you have edit it.
 In the training phase, the CrossEntropy have calculated the softmax value, I don't need to add the softmax layer in my model.
 In the testing phase, if I want to get the probabilities of each class, then I need to add a `nn.Softmax` by my self.
 '''
+
+
+def transform_image(img):
+    img = Image.fromarray(img)
+    transform_basic = img_transform.transforms_img()
+    return transform_basic(img)
+
+
 if __name__ == '__main__':
     device = "cuda:1" if torch.cuda.is_available() else "cpu"
 
@@ -43,13 +51,10 @@ if __name__ == '__main__':
     # define a whale test data set, since the url path is written within the data set class
     TEST_PATH = "../Humpback-Whale-Identification-1st--master/input/test/"
 
-    # ---- Transform operation from img_transform module----
-    transform_img = img_transform.transforms_img()
-
     images_test = np.array(os.listdir(TEST_PATH))
     # print(len(images_test))
     dataset_test = WhaleDatasetTest(
-        images_test, transform_img)
+        images_test, transform_test=transform_image)
     dataloader_test = torch.utils.data.DataLoader(
         dataset_test, batch_size=32, shuffle=False, num_workers=1, pin_memory=True)
 
