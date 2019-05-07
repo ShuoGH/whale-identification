@@ -91,7 +91,7 @@ def get_all_embedding_training(model, whale_data_loader, preCalculated=True):
         all_embedding_training = torch.Tensor()
         print("Getting all the embedding of train images...")
         for im, label in tqdm(whale_data_loader):
-            embedding_single_im = model.get_embedding(im)
+            embedding_single_im = model.get_embedding(im.to(device))
             # print(embedding_single_im.size())
             all_embedding_training = torch.cat(
                 (all_embedding_training, embedding_single_im), 0)
