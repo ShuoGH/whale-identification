@@ -125,4 +125,4 @@ if __name__ == '__main__':
     # model.load_state_dict(best_model_wts)
 
     torch.save(model.state_dict(),
-               './trained_model/{}_5thMay_oversample_no_new_whale.model'.format(model_name_train))
+               './trained_model/Siamese_7thTrain.model')
