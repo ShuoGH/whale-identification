@@ -126,8 +126,10 @@ if __name__ == '__main__':
 
     whale_train_data = WhaleDatasetTrain(
         dst_train['Image'], indexId_data_train, transform_train=transform_image)
-    training_set_embedding = get_all_embedding_training(model, torch.utils.data.DataLoader(
-        whale_train_data, batch_size=32, shuffle=False, num_workers=1, pin_memory=True), preCalculated=False)
+    whale_train_data_loader = torch.utils.data.DataLoader(
+        whale_train_data, batch_size=32, shuffle=False, num_workers=0, pin_memory=True)  # set the num_worker, trying to avoid being killed
+    training_set_embedding = get_all_embedding_training(
+        model, whale_train_data_loader, preCalculated=False)
 
     # ---- Load the test data set, we can use the previous whale data set----
     dataset_test = WhaleDatasetTest(
