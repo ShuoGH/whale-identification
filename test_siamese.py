@@ -73,6 +73,16 @@ def get_train_data():
     return pd.read_csv("./input/train_no_new_whale.csv")
 
 
+'''
+This is some problems in the function `get all embedding training`
+It seems that there are some corrupted images that I can't get the embedding of that...
+Due to the limited time, so I can't go on with this program. 
+
+Shuo
+7thMay.
+'''
+
+
 def get_all_embedding_training(model, whale_data_loader, preCalculated=True):
     '''
     load the pretrained embedding of all the training data set.
