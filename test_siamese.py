@@ -85,7 +85,7 @@ def get_all_embedding_training(model, whale_data_loader, preCalculated=True):
     '''
     if preCalculated:
         all_embedding_training = pickle.load(
-            "./input/all_embedding_training_tensor.pl")
+            open("./input/all_embedding_training_tensor.pl", "rb"))
         return all_embedding_training
     else:
         all_embedding_training = torch.Tensor()
@@ -97,13 +97,14 @@ def get_all_embedding_training(model, whale_data_loader, preCalculated=True):
                 (all_embedding_training, embedding_single_im), 0)
             # print(all_embedding_training.size())
 
-        pickle.dump(all_embedding_training,
-                    "./input/all_embedding_training_tensor.pl")
+        pickle.dump(all_embedding_training, open(
+            "./input/all_embedding_training_tensor.pl", "wb"))
         return all_embedding_training
 
 
 if __name__ == '__main__':
     device = "cuda:1" if torch.cuda.is_available() else "cpu"
+    # device = "cpu"
 
     model = SiameseNet(EmbeddingNet()).to(device)
     model.load_state_dict(torch.load(
